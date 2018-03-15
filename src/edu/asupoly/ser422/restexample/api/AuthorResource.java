@@ -50,7 +50,7 @@ public class AuthorResource {
      * */
 
     /**
-     * @api {get} /authors Get list of Authors
+     * @api {get} authors Get list of Authors
      * @apiName getAuthors
      * @apiGroup Authors
      *
