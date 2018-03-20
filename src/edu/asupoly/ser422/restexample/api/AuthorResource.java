@@ -32,6 +32,7 @@ public class AuthorResource {
 	// http://usna86-techbits.blogspot.com/2013/02/how-to-return-location-header-from.html
 	@Context
 	private UriInfo _uriInfo;
+ 
 	
 	 /**
      * @apiDefine BadRequestError
@@ -82,6 +83,7 @@ public class AuthorResource {
 	 * the same JSON as Jersey's internal version, so the output will look the same as version 1 when you run
 	 */
 	@GET
+	//@Produces({MediaType.APPLICATION_JSON})
 	@Path("/{authorId}")
 	public Response getAuthor(@PathParam("authorId") int aid) {
 		// This isn't correct - what if the authorId is not for an active author?
@@ -90,7 +92,7 @@ public class AuthorResource {
 		// the ResponseBuilder to use that. Note the result looks the same
 		try {
 			String aString = new ObjectMapper().writeValueAsString(author);
-			return Response.status(Response.Status.OK).entity(aString).build();
+			return Response.status(Response.Status.OK).header("Content-type", "application/json").entity(aString).build();
 		} catch (Exception exc) {
 			exc.printStackTrace();
 			return null;
@@ -98,9 +100,8 @@ public class AuthorResource {
 	}
 	 
 	// This is a 3rd version using a custom serializer I've encapsulated over in the new helper class
-	/*
-	 * @GET
-	 
+	/*@GET 
+	@Produces({MediaType.APPLICATION_JSON})
 	@Path("/{authorId}")
 	public Response getAuthor(@PathParam("authorId") int aid) {
 		Author author = __bService.getAuthor(aid);
@@ -114,8 +115,7 @@ public class AuthorResource {
 			exc.printStackTrace();
 			return null;
 		}
-	}
-	*/
+	}*/
 	/* This was the first version of POST we did 
 	@POST
 	@Consumes("text/plain")
@@ -166,8 +166,10 @@ public class AuthorResource {
 	@PUT
 	@Consumes("application/json")
     public Response updateAuthor(String json) {
+		System.out.println(json);
 		try {
 			Author a = AuthorSerializationHelper.getHelper().consumeJSON(json);
+			System.out.println(a);
 			if (__bService.updateAuthor(a)) {
 				// In the response payload it would still use Jackson's default serializer,
 				// so we directly invoke our serializer so the PUT payload reflects what it should.
@@ -196,4 +198,18 @@ public class AuthorResource {
 		return Response.status(405, "{ \"message \" : \"PATCH not supported\"}").build();
     }
     */
+	
+	@GET
+	@Path("/subject")
+	public Response getAuthorsBySubject(@QueryParam("location") String location) {
+		List<Author> authorList = __bService.getAuthorsBySubject(location);
+		AuthorSerializationHelper.getHelper().outputListJSON(authorList);
+		String res = AuthorSerializationHelper.getHelper().outputListXML(authorList);
+		if (authorList == null || authorList.size() == 0 ) {
+			return Response.status(404, "{ \"message \" : \"No such Author " + "test" + "\"}").build();
+		} else {
+			return Response.status(200).header("Content-type", "application/xml").entity(res).build();
+		}
+	}
+	
 }

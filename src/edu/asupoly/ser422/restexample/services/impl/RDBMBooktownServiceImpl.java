@@ -259,4 +259,16 @@ public class RDBMBooktownServiceImpl extends ABooktownServiceImpl {
 		} finally {
 		}
 	}
+
+	@Override
+	public boolean deleteBook(int bookID) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public List<Author> getAuthorsBySubject(String subject) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

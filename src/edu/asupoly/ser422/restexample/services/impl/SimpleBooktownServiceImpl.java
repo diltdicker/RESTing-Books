@@ -159,4 +159,53 @@ public class SimpleBooktownServiceImpl implements BooktownService {
 			__books.add(new Book(i, titles[i], a.getAuthorId(), s.getSubjectId()));
 		}
 	}
+
+	@Override
+	public boolean deleteBook(int bookID) {
+		boolean rval = false;
+		try {
+			Book b = __books.remove(bookID);
+			if (!(rval = (b != null))) {
+				//do nothing
+			}
+		} catch (Exception exc) {
+			exc.printStackTrace();
+			rval = false;
+		}
+		return rval;
+	}
+
+	@Override
+	public List<Author> getAuthorsBySubject(String location) {
+		List<Author> authors = new ArrayList<Author>();
+		// Determine the subject(s)
+		if (location.length() > 0) {
+			ArrayList<Integer> subjecNums = new ArrayList<Integer>();
+			ArrayList<Integer> authorIds = new ArrayList<Integer>();
+			for (Subject s: __subjects) {
+				if (s.getLocation().contains(location)) {
+					subjecNums.add(s.getSubjectId());
+					System.out.println(s);
+				}
+			}
+			for (int i = 0; i < subjecNums.size(); i++) {
+				for (Book b: __books) {
+					if (b.getSubjectId() == subjecNums.get(i)) {
+						if (authorIds.indexOf(b.getAuthorId()) == -1) {
+							authorIds.add(b.getAuthorId());
+						}
+					}
+				}
+			}
+			for (int i = 0; i < authorIds.size(); i++) {
+				for (Author a: __authors) {
+					if (a.getAuthorId() == authorIds.get(i)) {
+						authors.add(a);
+					}
+				}
+			}
+		}
+		//List<Author> authors = getAuthors();
+		return authors;
+	}
 }

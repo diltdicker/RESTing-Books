@@ -1,6 +1,12 @@
 package edu.asupoly.ser422.restexample.api;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import jdk.nashorn.api.scripting.JSObject;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -8,10 +14,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 
 import edu.asupoly.ser422.restexample.model.Author;
 
@@ -25,9 +35,9 @@ import edu.asupoly.ser422.restexample.model.Author;
  */
 public final class AuthorSerializationHelper {
 	// some locally used constant naming our Author field names
-	private static final String __AUTHORID = "authorIdent";
-	private static final String __LASTNAME = "lName";
-	private static final String __FIRSTNAME = "fName";
+	private static final String __AUTHORID = "authorId";
+	private static final String __LASTNAME = "lastName";
+	private static final String __FIRSTNAME = "firstName";
 	
 	private final static AuthorSerializationHelper __me = new AuthorSerializationHelper();
 	private ObjectMapper mapper = new ObjectMapper();
@@ -98,4 +108,53 @@ public final class AuthorSerializationHelper {
            jgen.writeEndObject();
        }
    }
+    
+   public JsonNode outputListJSON(List<Author> authorList) {
+	   JsonNode obj = mapper.valueToTree(authorList);
+	   //ObjectNode obj = JsonNodeFactory.instance.objectNode();
+	   //JSONPObject json = new JSONPObject(mapper.writeValueAsString(authorList));
+	   System.out.println("RESULT-JSON:\n" + obj);
+	   return obj;
+   }
+   
+   public String outputListXML(List<Author> authorList) {
+	   String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+	   JsonNode obj = mapper.valueToTree(authorList);
+	   System.out.println("RESULT-XML:\n" + obj);
+	   xmlString += "\n<body>";
+	   for (int i = 0; i < obj.size(); i++) {
+		   xmlString += "\n<Author>";
+		   Iterator<Entry<String, JsonNode>> nodes = obj.get(i).fields();
+		   while(nodes.hasNext()) {
+			   Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes.next();
+			   System.out.println("Key " + entry.getKey() + " Value " + entry.getValue());
+			   xmlString += "\n<" + entry.getKey() + ">" + entry.getValue() + "</" + entry.getKey() + ">";
+		   }
+		   xmlString += "\n</Author>";
+	   }
+	   xmlString += "\n</body>";
+	   Iterator<Entry<String, JsonNode>> nodes = obj.get(0).fields();
+	   while(nodes.hasNext()) {
+		   Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes.next();
+		   System.out.println("Key " + entry.getKey() + " Value " + entry.getValue());
+	   }
+	   return xmlString;
+	   
+   }
+   
+   public String convertXML(Author author) {
+	   String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+	   JsonNode obj = mapper.valueToTree(author);
+	   xmlString += "\n<Author>";
+	   Iterator<Entry<String, JsonNode>> nodes = obj.fields();
+	   while(nodes.hasNext()) {
+		   Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes.next();
+		   System.out.println("Key " + entry.getKey() + " Value " + entry.getValue());
+		   xmlString += "\n<" + entry.getKey() + ">" + entry.getValue() + "</" + entry.getKey() + ">";
+	   }
+	   xmlString += "\n</Author>";
+	   return xmlString; 
+   }
+   
+   
 }

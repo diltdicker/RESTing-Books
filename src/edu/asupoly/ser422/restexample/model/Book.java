@@ -2,7 +2,7 @@ package edu.asupoly.ser422.restexample.model;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+//@XmlRootElement
 public class Book {
 	private int id;
 	private String title;
