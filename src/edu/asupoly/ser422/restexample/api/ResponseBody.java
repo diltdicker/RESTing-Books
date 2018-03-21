@@ -60,10 +60,77 @@ public class ResponseBody {
 		String response = "";
 		if (isXML) {
 			response = _XMLHEADER;
+			response += "\n<response>";
+			response += "\n" + body;
+			response += "<links>";
+			for (int i = 0; i < hyperMediaLinks.size(); i++) {
+				response += "\n" + "<" + hyperMediaLinks.get(i).key + ">" + hyperMediaLinks.get(i).value + "</" + hyperMediaLinks.get(i).key + ">";
+			}
+			response += "\n</links>";
+			response += "\n</response>";
 			return response;
 		} else {
+			response += "{";
+			response += "\"body\": ";
+			response += body + ", ";
+			response += "\"links\": ";
+			response += "{";
+			for (int i = 0; i < hyperMediaLinks.size(); i++) {
+				response += "\"" + hyperMediaLinks.get(i).key + "\": \"" + hyperMediaLinks.get(i).value + "\"";
+				if (i != hyperMediaLinks.size() - 1) {
+					response += ", ";
+				}else {
+					response += " ";
+				}
+			}
+			response += "}";
+			response += "}";
 			return response;
 		}
+	}
+	
+	public String getPartialRepsonseString() {
+		String response = "";
+		if (isXML) {
+			//response = _XMLHEADER;
+			response += "<response>";
+			response += "\n" + body;
+			response += "<links>";
+			for (int i = 0; i < hyperMediaLinks.size(); i++) {
+				response += "\n" + "<" + hyperMediaLinks.get(i).key + ">" + hyperMediaLinks.get(i).value + "</" + hyperMediaLinks.get(i).key + ">";
+			}
+			response += "\n</links>";
+			response += "\n</response>";
+			return response;
+		} else {
+			response += "{";
+			response += "\"body\": ";
+			response += body + ", ";
+			response += "\"links\": ";
+			response += "{";
+			for (int i = 0; i < hyperMediaLinks.size(); i++) {
+				response += "\"" + hyperMediaLinks.get(i).key + "\": \"" + hyperMediaLinks.get(i).value + "\"";
+				if (i != hyperMediaLinks.size() - 1) {
+					response += ", ";
+				}else {
+					response += " ";
+				}
+			}
+			response += "}";
+			response += "}";
+			return response;
+		}
+	}
+	
+	/*
+	 * JSON only
+	 */
+	public static String getPartialArray(String innerBody) {
+		String response = "";
+		response += "[";
+		response += innerBody;
+		response +="]";
+		return response;
 	}
 	
 	public class LinkValue {

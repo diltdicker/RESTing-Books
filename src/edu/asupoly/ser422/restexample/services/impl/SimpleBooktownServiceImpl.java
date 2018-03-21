@@ -214,4 +214,31 @@ public class SimpleBooktownServiceImpl implements BooktownService {
 		//List<Author> authors = getAuthors();
 		return authors;
 	}
+
+	@Override
+	public boolean updateSubject(Subject s) {
+		boolean rval = false;
+		for (Subject old : __subjects) {
+			if (s.getSubjectId() == old.getSubjectId()) {
+				rval = true;
+				old.setLocation(s.getLocation());
+				old.setSubject(s.getSubject());
+			}
+		}
+		return rval;
+	}
+
+	@Override
+	public boolean updateSubjectLocation(Subject s) {
+		boolean rval = false;
+		for (Subject old : __subjects) {
+			if (s.getSubjectId() == old.getSubjectId()) {
+				rval = true;
+				old.setLocation(s.getLocation());
+				old.setSubject(old.getSubject());
+			}
+		}
+		return rval;
+	}
+
 }

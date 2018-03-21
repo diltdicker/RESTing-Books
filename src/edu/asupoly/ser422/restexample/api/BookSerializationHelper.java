@@ -103,12 +103,12 @@ public class BookSerializationHelper {
 	       }
 	   }
 	    
-	   public JsonNode outputListJSON(List<Book> bookList) {
+	   public String outputListJSON(List<Book> bookList) {
 		   JsonNode obj = mapper.valueToTree(bookList);
 		   //ObjectNode obj = JsonNodeFactory.instance.objectNode();
 		   //JSONPObject json = new JSONPObject(mapper.writeValueAsString(authorList));
 		   System.out.println("RESULT-JSON:\n" + obj);
-		   return obj;
+		   return obj.toString();
 	   }
 	   
 	   public String convertJSON(Book book) throws JsonProcessingException {
@@ -116,7 +116,7 @@ public class BookSerializationHelper {
 	   }
 	   
 	   public String outputListXML(List<Book> bookList) {
-		   String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+		   String xmlString = "";//<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 		   JsonNode obj = mapper.valueToTree(bookList);
 		   System.out.println("RESULT-XML:\n" + obj);
 		   xmlString += "\n<bookList>";
@@ -141,7 +141,7 @@ public class BookSerializationHelper {
 	   }
 	   
 	   public String convertXML(Book book) {
-		   String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+		   String xmlString = "";//<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 		   JsonNode obj = mapper.valueToTree(book);
 		   xmlString += "\n<book>";
 		   Iterator<Entry<String, JsonNode>> nodes = obj.fields();

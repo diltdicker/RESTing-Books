@@ -109,12 +109,12 @@ public final class AuthorSerializationHelper {
        }
    }
     
-   public JsonNode outputListJSON(List<Author> authorList) {
+   public String outputListJSON(List<Author> authorList) {
 	   JsonNode obj = mapper.valueToTree(authorList);
 	   //ObjectNode obj = JsonNodeFactory.instance.objectNode();
 	   //JSONPObject json = new JSONPObject(mapper.writeValueAsString(authorList));
 	   System.out.println("RESULT-JSON:\n" + obj);
-	   return obj;
+	   return obj.toString();
    }
    
    public String convertJSON(Author author) throws JsonProcessingException {
@@ -122,10 +122,10 @@ public final class AuthorSerializationHelper {
    }
    
    public String outputListXML(List<Author> authorList) {
-	   String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+	   String xmlString = "";//<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	   JsonNode obj = mapper.valueToTree(authorList);
 	   System.out.println("RESULT-XML:\n" + obj);
-	   xmlString += "\n<authorList>";
+	   xmlString += "<authorList>";
 	   for (int i = 0; i < obj.size(); i++) {
 		   xmlString += "\n<author>";
 		   Iterator<Entry<String, JsonNode>> nodes = obj.get(i).fields();
@@ -147,9 +147,9 @@ public final class AuthorSerializationHelper {
    }
    
    public String convertXML(Author author) {
-	   String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+	   String xmlString = "";//<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	   JsonNode obj = mapper.valueToTree(author);
-	   xmlString += "\n<author>";
+	   xmlString += "<author>";
 	   Iterator<Entry<String, JsonNode>> nodes = obj.fields();
 	   while(nodes.hasNext()) {
 		   Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes.next();

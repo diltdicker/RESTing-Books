@@ -96,12 +96,12 @@ public final class SubjectSerializationHelper {
        }
    }
     
-    public JsonNode outputListJSON(List<Subject> subjectList) {
+    public String outputListJSON(List<Subject> subjectList) {
  	   JsonNode obj = mapper.valueToTree(subjectList);
  	   //ObjectNode obj = JsonNodeFactory.instance.objectNode();
  	   //JSONPObject json = new JSONPObject(mapper.writeValueAsString(authorList));
  	   System.out.println("RESULT-JSON:\n" + obj);
- 	   return obj;
+ 	   return obj.toString();
     }
     
     public String convertJSON(Subject subject) throws JsonProcessingException {
@@ -109,7 +109,7 @@ public final class SubjectSerializationHelper {
     }
     
     public String outputListXML(List<Subject> subjectList) {
- 	   String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+ 	   String xmlString = "";//<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
  	   JsonNode obj = mapper.valueToTree(subjectList);
  	   System.out.println("RESULT-XML:\n" + obj);
  	   xmlString += "\n<subjectList>";
@@ -134,7 +134,7 @@ public final class SubjectSerializationHelper {
     }
     
     public String convertXML(Subject subject) {
- 	   String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+ 	   String xmlString = "";//<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
  	   JsonNode obj = mapper.valueToTree(subject);
  	   xmlString += "\n<subject>";
  	   Iterator<Entry<String, JsonNode>> nodes = obj.fields();

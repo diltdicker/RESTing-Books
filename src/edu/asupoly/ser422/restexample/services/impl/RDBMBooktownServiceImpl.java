@@ -271,4 +271,16 @@ public class RDBMBooktownServiceImpl extends ABooktownServiceImpl {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public boolean updateSubject(Subject s) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean updateSubjectLocation(Subject s) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
