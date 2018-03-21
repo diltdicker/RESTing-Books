@@ -117,22 +117,26 @@ public final class AuthorSerializationHelper {
 	   return obj;
    }
    
+   public String convertJSON(Author author) throws JsonProcessingException {
+	   return new ObjectMapper().writeValueAsString(author);
+   }
+   
    public String outputListXML(List<Author> authorList) {
 	   String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	   JsonNode obj = mapper.valueToTree(authorList);
 	   System.out.println("RESULT-XML:\n" + obj);
-	   xmlString += "\n<body>";
+	   xmlString += "\n<authorList>";
 	   for (int i = 0; i < obj.size(); i++) {
-		   xmlString += "\n<Author>";
+		   xmlString += "\n<author>";
 		   Iterator<Entry<String, JsonNode>> nodes = obj.get(i).fields();
 		   while(nodes.hasNext()) {
 			   Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes.next();
 			   System.out.println("Key " + entry.getKey() + " Value " + entry.getValue());
-			   xmlString += "\n<" + entry.getKey() + ">" + entry.getValue() + "</" + entry.getKey() + ">";
+			   xmlString += "\n<" + entry.getKey() + ">" + entry.getValue().asText() + "</" + entry.getKey() + ">";
 		   }
-		   xmlString += "\n</Author>";
+		   xmlString += "\n</author>";
 	   }
-	   xmlString += "\n</body>";
+	   xmlString += "\n</authorList>";
 	   Iterator<Entry<String, JsonNode>> nodes = obj.get(0).fields();
 	   while(nodes.hasNext()) {
 		   Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes.next();
@@ -145,14 +149,14 @@ public final class AuthorSerializationHelper {
    public String convertXML(Author author) {
 	   String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	   JsonNode obj = mapper.valueToTree(author);
-	   xmlString += "\n<Author>";
+	   xmlString += "\n<author>";
 	   Iterator<Entry<String, JsonNode>> nodes = obj.fields();
 	   while(nodes.hasNext()) {
 		   Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes.next();
 		   System.out.println("Key " + entry.getKey() + " Value " + entry.getValue());
-		   xmlString += "\n<" + entry.getKey() + ">" + entry.getValue() + "</" + entry.getKey() + ">";
+		   xmlString += "\n<" + entry.getKey() + ">" + entry.getValue().asText() + "</" + entry.getKey() + ">";
 	   }
-	   xmlString += "\n</Author>";
+	   xmlString += "\n</author>";
 	   return xmlString; 
    }
    

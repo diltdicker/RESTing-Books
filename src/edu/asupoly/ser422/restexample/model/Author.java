@@ -35,11 +35,6 @@ public class Author {
 		return "Author ID " + getAuthorId() + ", lastName " + getLastName() + ", firstName " + getFirstName();
 	}
 	
-	public String toXML() {
-		String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-		return xmlString;
-	}
-	
 	private int    __id;
 	private String __lastName;
 	private String __firstName;

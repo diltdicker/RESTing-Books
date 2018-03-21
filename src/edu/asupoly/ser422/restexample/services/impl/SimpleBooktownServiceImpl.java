@@ -143,7 +143,13 @@ public class SimpleBooktownServiceImpl implements BooktownService {
     		return null;
     }
     public List<Book> findBooksBySubject(int subjectId) {
-    		return null;
+    	List<Book> deepClone = new ArrayList<Book>();
+    	for (Book b: __books) {
+    		if (b.getSubjectId() == subjectId) {
+    			deepClone.add(new Book(b.getBookId(), b.getTitle(), b.getAuthorId(), b.getSubjectId()));
+    		}
+    	}
+    	return deepClone;
     }
     
 	// Only instantiated by factory?

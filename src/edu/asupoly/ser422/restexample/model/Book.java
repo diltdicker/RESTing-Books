@@ -43,4 +43,8 @@ public class Book {
 	public void setSubjectId(int subjectId) {
 		this.subjectId = subjectId;
 	}
+	
+	public String toString() {
+		return "bookID: " + this.id + " title: " + this.title + " authorID: " + this.authorId + " subjectID: " + this.subjectId;
+	}
 }

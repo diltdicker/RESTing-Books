@@ -1,6 +1,10 @@
 package edu.asupoly.ser422.restexample.api;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -8,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -36,16 +41,16 @@ public final class SubjectSerializationHelper {
 		return __me;
 	}
 	
-	public String generateJSON(Author author) throws JsonProcessingException {
+	public String generateJSON(Subject author) throws JsonProcessingException {
 		// Since a custom serializer was added to the mapper via registerModule,
 		// internally it will invoke the serialize method in the inner class below
 		return mapper.writeValueAsString(author);
 	}
 	
-	public Author consumeJSON(String json) throws IOException, JsonProcessingException {
+	public Subject consumeJSON(String json) throws IOException, JsonProcessingException {
 		// A deserializer goes from JSON to the Object using the inverse process
 		System.out.println("consumeJSON: " + json);
-		return mapper.readValue(json, Author.class);
+		return mapper.readValue(json, Subject.class);
 	}
 	
 	// Inner class for custom Author deserialization.
@@ -90,5 +95,56 @@ public final class SubjectSerializationHelper {
            jgen.writeEndObject();
        }
    }
+    
+    public JsonNode outputListJSON(List<Subject> subjectList) {
+ 	   JsonNode obj = mapper.valueToTree(subjectList);
+ 	   //ObjectNode obj = JsonNodeFactory.instance.objectNode();
+ 	   //JSONPObject json = new JSONPObject(mapper.writeValueAsString(authorList));
+ 	   System.out.println("RESULT-JSON:\n" + obj);
+ 	   return obj;
+    }
+    
+    public String convertJSON(Subject subject) throws JsonProcessingException {
+ 	   return new ObjectMapper().writeValueAsString(subject);
+    }
+    
+    public String outputListXML(List<Subject> subjectList) {
+ 	   String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+ 	   JsonNode obj = mapper.valueToTree(subjectList);
+ 	   System.out.println("RESULT-XML:\n" + obj);
+ 	   xmlString += "\n<subjectList>";
+ 	   for (int i = 0; i < obj.size(); i++) {
+ 		   xmlString += "\n<subject>";
+ 		   Iterator<Entry<String, JsonNode>> nodes = obj.get(i).fields();
+ 		   while(nodes.hasNext()) {
+ 			   Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes.next();
+ 			   System.out.println("Key " + entry.getKey() + " Value " + entry.getValue());
+ 			   xmlString += "\n<" + entry.getKey() + ">" + entry.getValue().asText() + "</" + entry.getKey() + ">";
+ 		   }
+ 		   xmlString += "\n</subject>";
+ 	   }
+ 	   xmlString += "\n</subjectList>";
+ 	   Iterator<Entry<String, JsonNode>> nodes = obj.get(0).fields();
+ 	   while(nodes.hasNext()) {
+ 		   Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes.next();
+ 		   System.out.println("Key " + entry.getKey() + " Value " + entry.getValue());
+ 	   }
+ 	   return xmlString;
+ 	   
+    }
+    
+    public String convertXML(Subject subject) {
+ 	   String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+ 	   JsonNode obj = mapper.valueToTree(subject);
+ 	   xmlString += "\n<subject>";
+ 	   Iterator<Entry<String, JsonNode>> nodes = obj.fields();
+ 	   while(nodes.hasNext()) {
+ 		   Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes.next();
+ 		   System.out.println("Key " + entry.getKey() + " Value " + entry.getValue());
+ 		   xmlString += "\n<" + entry.getKey() + ">" + entry.getValue().asText() + "</" + entry.getKey() + ">";
+ 	   }
+ 	   xmlString += "\n</subject>";
+ 	   return xmlString; 
+    }
 
 }

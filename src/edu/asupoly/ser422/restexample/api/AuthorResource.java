@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -13,6 +14,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -32,6 +34,8 @@ public class AuthorResource {
 	// http://usna86-techbits.blogspot.com/2013/02/how-to-return-location-header-from.html
 	@Context
 	private UriInfo _uriInfo;
+	@Context
+	private HttpHeaders _headers;
  
 	
 	 /**
@@ -40,6 +44,9 @@ public class AuthorResource {
      * */
     /** @apiDefine ActivityNotFoundError
      * @apiError (Error 4xx) {404} NotFound Activity cannot be found
+     * */
+	/** @apiDefine ResourceNotFoundError
+     * @apiError (Error 4xx) {404} NotFound Resource cannot be found
      * */
     /**
      * @apiDefine InternalServerError
@@ -50,7 +57,29 @@ public class AuthorResource {
      * @apiError (Error 5xx) {501} NotImplemented The resource has not been implemented. Please keep patience, our developers are working hard on it!!
      * */
 
-    /**
+	/**
+     * @api {options} authors Get list of Authors
+     * @apiName optionsAuthors
+     * @apiGroup Authors
+     *
+     * @apiUse BadRequestError
+     * @apiUse InternalServerError
+     * 
+     * @apiSuccessExample Success-Response:
+     * 	HTTP/1.1 200 OK
+     * 	[
+     *   {"authorId":1111,"firstName":"Ariel","lastName":"Denham"},
+     *   {"authorId":1212,"firstName":"John","lastName":"Worsley"}
+     *  ]
+     * 
+     * */
+	
+	@OPTIONS
+	public Response getOptions() {
+		return Response.status(Response.Status.OK).header("Content-type", "text/html").entity(_uriInfo.getAbsolutePath().toString()).build();
+	}
+	
+	/**
      * @api {get} authors Get list of Authors
      * @apiName getAuthors
      * @apiGroup Authors
@@ -66,9 +95,17 @@ public class AuthorResource {
      *  ]
      * 
      * */
-	@GET
-	public List<Author> getAuthors() {
-		return __bService.getAuthors();
+	
+	@GET 
+	public Response getAuthors() {
+		List<Author> authors = __bService.getAuthors();
+		if (_headers.getRequestHeader("Accept-Encoding").get(0).equals(MediaType.APPLICATION_XML)) {
+			return Response.status(Response.Status.OK).header("Content-type", 
+					"application/xml").entity(AuthorSerializationHelper.getHelper().outputListXML(authors)).build();
+		} else {
+			return Response.status(Response.Status.OK).header("Content-type", 
+					"application/json").entity(AuthorSerializationHelper.getHelper().outputListJSON(authors).toString()).build();
+		}
 	}
 
 	/* This is the first version of GET we did, using defaults and letting Jersey internally serialize
@@ -82,8 +119,26 @@ public class AuthorResource {
 	 * This is a second version - it uses Jackson's default mapping via ObjectMapper, which spits out
 	 * the same JSON as Jersey's internal version, so the output will look the same as version 1 when you run
 	 */
-	@GET
-	//@Produces({MediaType.APPLICATION_JSON})
+	
+	/**
+     * @api {get} authors/{authorID} Get a single Author
+     * @apiName getAuthor
+     * @apiGroup Authors
+     *
+     * @apiUse BadRequestError
+     * @apiUse ResourceNotFoundError
+     * @apiUse InternalServerError
+     * 
+     * @apiSuccessExample Success-Response:
+     * 	HTTP/1.1 200 OK
+     * 	[
+     *   {"authorId":1111,"firstName":"Ariel","lastName":"Denham"},
+     *   {"authorId":1212,"firstName":"John","lastName":"Worsley"}
+     *  ]
+     * 
+     * */
+	
+	@GET//@Produces({MediaType.APPLICATION_JSON})
 	@Path("/{authorId}")
 	public Response getAuthor(@PathParam("authorId") int aid) {
 		// This isn't correct - what if the authorId is not for an active author?
@@ -129,9 +184,23 @@ public class AuthorResource {
 	/*
 	 * This was the second version that added simple custom response headers and payload
 	 */
+	/**
+     * @api {post} authors/ Create a new Author
+     * @apiName postAuthors
+     * @apiGroup Authors
+     *
+     * @apiUse BadRequestError
+     * @apiUse InternalServerError
+     * 
+     * @apiSuccessExample Success-Response:
+     * 	HTTP/1.1 201 OK
+     * 
+     * */
+	
 	@POST
 	@Consumes("text/plain")
-    public Response createAuthor(String name) {		
+    public Response createAuthor(String name) {
+		System.out.println("input:" + name);
 		String[] names = name.split(" ");
 		int aid = __bService.createAuthor(names[0], names[1]);
 		if (aid == -1) {
@@ -163,6 +232,24 @@ public class AuthorResource {
 	 * compatible with methods that do not use it (which will continue to use the Jersey default). If you
 	 * decide to customize, then you should be certain to use your (de)serializer throughout your resource!
 	 */
+	/**
+     * @api {put} authors Update a single Author
+     * @apiName putAuthor
+     * @apiGroup Authors
+     *
+     * @apiUse BadRequestError
+     * @apiUse ResourceNotFoundError
+     * @apiUse InternalServerError
+     * 
+     * @apiSuccessExample Success-Response:
+     * 	HTTP/1.1 201 OK
+     * 	[
+     *   {"authorId":1111,"firstName":"Ariel","lastName":"Denham"},
+     *   {"authorId":1212,"firstName":"John","lastName":"Worsley"}
+     *  ]
+     * 
+     * */
+	
 	@PUT
 	@Consumes("application/json")
     public Response updateAuthor(String json) {
@@ -184,6 +271,20 @@ public class AuthorResource {
 		}
     }
 	
+	/**
+     * @api {delete} authors Delete a single Author
+     * @apiName deleteAuthor
+     * @apiGroup Authors
+     *
+     * @apiUse BadRequestError
+     * @apiUse ResourceNotFoundError
+     * @apiUse InternalServerError
+     * 
+     * @apiSuccessExample Success-Response:
+     * 	HTTP/1.1 204 OK
+     * 
+     * */
+	
 	@DELETE
     public Response deleteAuthor(@QueryParam("id") int aid) {
 		if (__bService.deleteAuthor(aid)) {
@@ -199,16 +300,39 @@ public class AuthorResource {
     }
     */
 	
+	/**
+     * @api {get} authors/subject Get a list of Authors based on Subject location
+     * @apiName getAuthorSubject
+     * @apiGroup Authors
+     * 
+     * @apiParam {String} location Location substring of a Subject.
+     *
+     * @apiUse BadRequestError
+     * @apiUse ResourceNotFoundError
+     * @apiUse InternalServerError
+     * 
+     * @apiSuccessExample Success-Response:
+     * 	HTTP/1.1 200 OK
+     * 	[
+     *   {"authorId":1111,"firstName":"Ariel","lastName":"Denham"},
+     *   {"authorId":1212,"firstName":"John","lastName":"Worsley"}
+     *  ]
+     * 
+     * */
+	
 	@GET
 	@Path("/subject")
 	public Response getAuthorsBySubject(@QueryParam("location") String location) {
 		List<Author> authorList = __bService.getAuthorsBySubject(location);
 		AuthorSerializationHelper.getHelper().outputListJSON(authorList);
-		String res = AuthorSerializationHelper.getHelper().outputListXML(authorList);
+		
+		
+		
+		String authors = AuthorSerializationHelper.getHelper().outputListXML(authorList);
 		if (authorList == null || authorList.size() == 0 ) {
 			return Response.status(404, "{ \"message \" : \"No such Author " + "test" + "\"}").build();
 		} else {
-			return Response.status(200).header("Content-type", "application/xml").entity(res).build();
+			return Response.status(200).header("Content-type", "application/xml").entity(authors).build();
 		}
 	}
 	

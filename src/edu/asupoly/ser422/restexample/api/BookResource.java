@@ -17,8 +17,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.asupoly.ser422.restexample.model.Author;
 import edu.asupoly.ser422.restexample.model.Book;
 import edu.asupoly.ser422.restexample.services.BooktownService;
 import edu.asupoly.ser422.restexample.services.BooktownServiceFactory;
@@ -31,17 +33,78 @@ public class BookResource {
 	@Context
 	private UriInfo _uriInfo;
 	@Context
-	private HttpHeaders headers;
+	private HttpHeaders _headers;
+	
+	/**
+     * @apiDefine BadRequestError
+     * @apiError (Error 4xx) {400} BadRequest Bad Request Encountered
+     * */
+    /** @apiDefine ActivityNotFoundError
+     * @apiError (Error 4xx) {404} NotFound Activity cannot be found
+     * */
+	/** @apiDefine ResourceNotFoundError
+     * @apiError (Error 4xx) {404} NotFound Resource cannot be found
+     * */
+    /**
+     * @apiDefine InternalServerError
+     * @apiError (Error 5xx) {500} InternalServerError Something went wrong at server, Please contact the administrator!
+     * */
+    /**
+     * @apiDefine NotImplementedError
+     * @apiError (Error 5xx) {501} NotImplemented The resource has not been implemented. Please keep patience, our developers are working hard on it!!
+     * */
+	
+	/**
+     * @api {get} books Get list of Books
+     * @apiName getBooks
+     * @apiGroup Books
+     *
+     * @apiUse BadRequestError
+     * @apiUse InternalServerError
+     * 
+     * @apiSuccessExample Success-Response:
+     * 	HTTP/1.1 200 OK
+     * 	[
+     *   {"authorId":1111,"firstName":"Ariel","lastName":"Denham"},
+     *   {"authorId":1212,"firstName":"John","lastName":"Worsley"}
+     *  ]
+     * 
+     * */
 	
 	@GET
-	public List<Book> getBooks() {
-		return __bService.getBooks();
+	public Response getBooks() {
+		List<Book> books = __bService.getBooks();
+		if (_headers.getRequestHeader("Accept-Encoding").get(0).equals(MediaType.APPLICATION_XML)) {
+			return Response.status(Response.Status.OK).header("Content-type", 
+					"application/xml").entity(BookSerializationHelper.getHelper().outputListXML(books)).build();
+		} else {
+			return Response.status(Response.Status.OK).header("Content-type", 
+					"application/json").entity(BookSerializationHelper.getHelper().outputListJSON(books).toString()).build();
+		}
 	}
+	
+	/**
+     * @api {get} books/{bookID} Get a single Book
+     * @apiName getBook
+     * @apiGroup Books
+     *
+     * @apiUse BadRequestError
+     * @apiUse InternalServerError
+     * 
+     * @apiSuccessExample Success-Response:
+     * 	HTTP/1.1 200 OK
+     * 	[
+     *   {"authorId":1111,"firstName":"Ariel","lastName":"Denham"},
+     *   {"authorId":1212,"firstName":"John","lastName":"Worsley"}
+     *  ]
+     * 
+     * */
 	
 	@GET
 	@Path("/{bookID}")
 	public Response getBook(@PathParam("bookID") int bID) {
 		Book book = __bService.getBook(bID);
+		
 		try {
 			String aString = new ObjectMapper().writeValueAsString(book);
 			//if (headers.CONTENT_TYPE == MediaType.APPLICATION_XML_TYPE) {
@@ -57,24 +120,145 @@ public class BookResource {
 		}
 	}
 	
-	/*@POST
-	@Consumes("text/plain")
-	public Response createBook(String title, int aid, int sid) {
-		return null;
-	}*/
+	/**
+     * @api {post} books Create a new Book
+     * @apiName postBook
+     * @apiGroup Books
+     *
+     * @apiUse BadRequestError
+     * @apiUse InternalServerError
+     * 
+     * @apiSuccessExample Success-Response:
+     * 	HTTP/1.1 200 OK
+     * 	[
+     *   {"authorId":1111,"firstName":"Ariel","lastName":"Denham"},
+     *   {"authorId":1212,"firstName":"John","lastName":"Worsley"}
+     *  ]
+     * 
+     * */
+	
+	@POST
+	@Consumes("application/json")
+	/*
+	 * title authorID subjectID
+	 */
+	public Response createBook(String json) {
+		int bID;
+		Book b;
+		System.out.println(json);
+//		String[] elements = text.split(" ");
+//		if (elements.length == 3) {
+//			try {
+//				bID = __bService.createBook(elements[0], Integer.parseInt(elements[1]), Integer.parseInt(elements[2]));
+//				if (bID == -1) {
+//					return Response.status(404, "{ \"message \" : \"No such Author " + "" + "\"}").build();
+//				} else {
+//					b = __bService.getBook(bID);
+//					if (_headers.getMediaType() != null && _headers.getMediaType().toString().equals(MediaType.APPLICATION_XML)) {
+//						return Response.status(Response.Status.CREATED).header("Content-type", 
+//								"application/xml").entity(BookSerializationHelper.getHelper().convertXML(b)).build();
+//					} else {
+//						return Response.status(Response.Status.CREATED).header("Content-type", 
+//								"application/json").entity(BookSerializationHelper.getHelper().convertJSON(b)).build();
+//					}
+//				}
+//			} catch (NumberFormatException e) {
+//				return Response.status(404, "{ \"message \" : \"No such Author " + "" + "\"}").build();
+//			} catch (Exception e) {
+//				return Response.status(404, "{ \"message \" : \"No such Author " + "" + "\"}").build();
+//			}
+//		} else {
+//			return Response.status(404, "{ \"message \" : \"No such Author " + "" + "\"}").build();
+//		}
+		try {
+			b = BookSerializationHelper.getHelper().consumeJSON(json);
+			System.out.println(b);
+			 bID = __bService.createBook(b.getTitle(), b.getAuthorId(), b.getSubjectId());
+		} catch (Exception e) {
+			e.printStackTrace();
+			bID = -1;
+		}
+		if (bID == -1) {
+			return Response.status(Response.Status.BAD_REQUEST).header("Content-type", "text/html").entity("created book").build();
+		} else {
+			b = __bService.getBook(bID);
+			if (_headers.getRequestHeader("Accept-Encoding").get(0).equals(MediaType.APPLICATION_XML)) {
+				return Response.status(Response.Status.CREATED).header("Content-type", 
+						"application/xml").entity(BookSerializationHelper.getHelper().convertXML(b)).build();
+			} else {
+				return Response.status(Response.Status.CREATED).header("Content-type", 
+						"application/json").entity(b).build();
+			}
+		}
+		
+	}
+	
+	/**
+     * @api {get} books/{bookID}/author Get an author of a Book
+     * @apiName getBookAuthor
+     * @apiGroup Books
+     *
+     * @apiUse BadRequestError
+     * @apiUse InternalServerError
+     * 
+     * @apiSuccessExample Success-Response:
+     * 	HTTP/1.1 200 OK
+     * 	[
+     *   {"authorId":1111,"firstName":"Ariel","lastName":"Denham"},
+     *   {"authorId":1212,"firstName":"John","lastName":"Worsley"}
+     *  ]
+     * 
+     * */
 	
 	@GET
 	@Path("/{bookID}/author")
 	public Response findAuthorOfBook(@PathParam("bookID") int bID) {
-		return null;
+		Book book  = __bService.getBook(bID);
+		Author author = null;
+		if (book != null) {
+			author = __bService.getAuthor(book.getAuthorId());
+		}
+		if (author != null) {
+			if (_headers.getRequestHeader("Accept-Encoding").get(0).equals(MediaType.APPLICATION_XML)) {
+				return Response.status(Response.Status.OK).header("Content-type", 
+						"application/xml").entity(AuthorSerializationHelper.getHelper().convertXML(author)).build();
+			} else {
+				try {
+					return Response.status(Response.Status.CREATED).header("Content-type", 
+							"application/json").entity(AuthorSerializationHelper.getHelper().convertJSON(author)).build();
+				} catch (JsonProcessingException e) {
+					e.printStackTrace();
+					return Response.status(500, "{ \"message \" : \"Internal Error " + "\"}").build();
+				}
+			}
+		} else {
+			return Response.status(404, "{ \"message \" : \"No such Author " + bID + "\"}").build();
+		}
 	}
+	
+	/**
+     * @api {delete} books Delete a single book
+     * @apiName deleteBook
+     * @apiGroup Books
+     *
+     * @apiUse BadRequestError
+     * @apiUse InternalServerError
+     * 
+     * @apiSuccessExample Success-Response:
+     * 	HTTP/1.1 200 OK
+     * 	[
+     *   {"authorId":1111,"firstName":"Ariel","lastName":"Denham"},
+     *   {"authorId":1212,"firstName":"John","lastName":"Worsley"}
+     *  ]
+     * 
+     * */
 	
 	@DELETE
     public Response deleteBook(@QueryParam("id") int bID) {
 		if (__bService.deleteBook(bID)) {
 			return Response.status(204).build();
 		} else {
-			return Response.status(404, "{ \"message \" : \"No such Author " + bID + "\"}").build();
+			return Response.status(404, "{ \"message \" : \"No such Book " + bID + "\"}").build();
 		}
     }
 }
